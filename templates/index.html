@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+
+{% block title %}JobSync: Syncing Skills with Opportunities{% endblock %}
+
+{% block content %}
+
+<style>
+    .gradient-header {
+        background-image: linear-gradient(to right, #6b46c1, #9333ea);
+    }
+
+    .hero-section {
+        background-image: url('https://storage.pixteller.com/designs/designs-images/2019-03-27/05/simple-background-backgrounds-passion-simple-1-5c9b95bd34713.png');
+        background-size: cover;
+        background-position: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .hero-section::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(to top, rgba(67, 56, 202, 0.8), rgba(124, 58, 237, 0.6), transparent);
+    }
+
+    .hero-content {
+        position: relative;
+        z-index: 10;
+    }
+
+    .animated-button {
+        transition: all 0.3s ease;
+    }
+
+    .animated-button:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 15px rgba(107, 70, 193, 0.4);
+    }
+</style>
+
+<div class="min-h-screen flex flex-col items-center p-6">
+
+    <div
+        class="gradient-header text-white p-6 rounded-b-2xl mb-8 flex flex-col items-center justify-center space-y-2 w-full max-w-5xl shadow-lg">
+        <a href="#" class="flex items-center space-x-4">
+            <svg class="w-12 h-12" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path
+                    d="M50 0C22.386 0 0 22.386 0 50C0 77.614 22.386 100 50 100C77.614 100 100 77.614 100 50C100 22.386 77.614 0 50 0ZM50 10C72.0914 10 90 27.9086 90 50C90 72.0914 72.0914 90 50 90C27.9086 90 10 72.0914 10 50C10 27.9086 27.9086 10 50 10ZM50 20C33.4315 20 20 33.4315 20 50C20 66.5685 33.4315 80 50 80C66.5685 80 80 66.5685 80 50C80 33.4315 66.5685 20 50 20ZM50 30C44.4772 30 40 34.4772 40 40H60C60 34.4772 55.5228 30 50 30ZM40 60H60C60 65.5228 55.5228 70 50 70C44.4772 70 40 65.5228 40 60Z"
+                    fill="url(#paint0_linear)" />
+                <defs>
+                    <linearGradient id="paint0_linear" x1="0" y1="0" x2="100" y2="100" gradientUnits="userSpaceOnUse">
+                        <stop stop-color="#FFFFFF" />
+                        <stop offset="1" stop-color="#E5E7EB" />
+                    </linearGradient>
+                </defs>
+            </svg>
+            <h1 class="text-4xl font-extrabold tracking-tight">
+                JobSync
+                <span class="block text-2xl font-semibold text-indigo-100">Syncing Skills with Opportunities</span>
+            </h1>
+        </a>
+    </div>
+
+    <div class="hero-section text-center p-20 rounded-3xl shadow-2xl w-full max-w-5xl mb-12 text-white">
+        <div class="hero-content">
+            <h2 class="text-5xl font-extrabold leading-tight tracking-tight">
+                Find Your Perfect Career Path
+            </h2>
+            <p class="mt-6 text-xl max-w-2xl mx-auto">
+                Our AI-powered system matches your unique skills with the best job opportunities, effortlessly.
+            </p>
+            <div class="mt-10 flex flex-col sm:flex-row justify-center sm:space-x-6 space-y-4 sm:space-y-0">
+                <a href="{% url 'signup' %}"
+                    class="inline-block bg-indigo-600 hover:bg-indigo-700 transition text-white text-lg font-semibold py-4 px-10 rounded-full animated-button shadow-lg">
+                    Get Started
+                </a>
+                <a href="{% url 'signin' %}"
+                    class="inline-block bg-white hover:bg-gray-100 transition text-indigo-600 text-lg font-semibold py-4 px-10 rounded-full animated-button shadow-lg">
+                    Sign In
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <section class="bg-gradient-to-b from-indigo-50 to-white py-16 rounded-3xl shadow-xl w-full max-w-5xl">
+        <h2 class="text-3xl font-bold text-center text-indigo-700 mb-12">How It Works</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-12 text-center px-6">
+
+            <div class="space-y-4">
+                <svg class="w-16 h-16 mx-auto text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+                </svg>
+                <h3 class="text-xl font-bold">1. Upload Your Resume</h3>
+                <p class="text-gray-600">Simply upload your resume in PDF format. Our NLP engine will do the rest.
+                </p>
+            </div>
+
+            <div class="space-y-4">
+                <svg class="w-16 h-16 mx-auto text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 00-1 1v3a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 00-1 1v1a2 2 0 11-4 0v-1a1 1 0 00-1-1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H3a1 1 0 01-1-1V7a1 1 0 011-1h3a1 1 0 001-1V4a2 2 0 114 0z">
+                    </path>
+                </svg>
+                <h3 class="text-xl font-bold">2. Define Your Preferences</h3>
+                <p class="text-gray-600">Tell us what you're looking for, including location and salary
+                    expectations.</p>
+            </div>
+
+            <div class="space-y-4">
+                <svg class="w-16 h-16 mx-auto text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 12l2 2 4-4m5.618-4.131a8.25 8.25 0 11-13.913 11.233m13.913-11.233L21 8.5V4h-4.5z">
+                    </path>
+                </svg>
+                <h3 class="text-xl font-bold">3. Get Matched!</h3>
+                <p class="text-gray-600">Our smart algorithm matches your profile to the best-fit job listings.</p>
+            </div>
+
+        </div>
+    </section>
+</div>
+
+{% endblock %}

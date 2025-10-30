@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% block title %}Sign In | JobSync{% endblock %}
+
+{% block content %}
+<div class="min-h-screen grid grid-cols-1 md:grid-cols-2">
+
+    <div
+        class="hidden md:flex flex-col items-center justify-center bg-gradient-to-r from-purple-600 to-indigo-700 text-white p-12 text-center">
+        <h1 class="text-5xl font-extrabold">JobSync</h1>
+        <p class="mt-4 text-lg text-indigo-100">Syncing Skills with Opportunities.</p>
+    </div>
+
+    <div class="bg-gray-100 flex items-center justify-center p-6 md:p-12">
+        <div class="w-full max-w-md">
+            <div class="bg-white shadow-xl rounded-2xl p-8">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Sign In to Your Account</h2>
+
+                {% if form.non_field_errors %}
+                <div class="bg-red-100 text-red-700 p-3 rounded-lg mb-6">
+                    {% for error in form.non_field_errors %}
+                    <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <form method="POST" class="space-y-6">
+                    {% csrf_token %}
+                    <div>
+                        <label for="{{ form.username.id_for_label }}"
+                            class="block text-sm font-medium text-gray-700"><b>Email</b></label>
+                        {{ form.username }}
+                    </div>
+                    <div>
+                        <label for="{{ form.password.id_for_label }}"
+                            class="block text-sm font-medium text-gray-700"><b>Password</b></label>
+                        <div class="relative">
+                            {{ form.password }}
+                            <button type="button" id="togglePassword"
+                                class="absolute inset-y-0 right-0 px-3 flex items-center text-gray-500">
+                                <svg id="eyeIcon" class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                    viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div>
+                        <button type="submit"
+                            class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-3 px-4 rounded-lg font-semibold hover:opacity-90 transition shadow-md">Sign
+                            In</button>
+                    </div>
+                </form>
+                <p class="mt-8 text-center text-sm text-gray-700">Don't have an account? <a href="{% url 'signup' %}"
+                        class="font-medium text-indigo-600 hover:text-indigo-500">Sign Up</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // This script remains the same
+    const eyeIconSvg = `<path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />`;
+    const eyeSlashIconSvg = `<path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.572M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M1.5 1.5l21 21" />`;
+    function setupPasswordToggle(inputId, buttonId, svgId) {
+        const passwordInput = document.getElementById(inputId);
+        const toggleButton = document.getElementById(buttonId);
+        const eyeIcon = document.getElementById(svgId);
+        if (passwordInput && toggleButton) {
+            toggleButton.addEventListener('click', () => {
+                if (passwordInput.type === 'password') {
+                    passwordInput.type = 'text';
+                    eyeIcon.innerHTML = eyeSlashIconSvg;
+                } else {
+                    passwordInput.type = 'password';
+                    eyeIcon.innerHTML = eyeIconSvg;
+                }
+            });
+        }
+    }
+    setupPasswordToggle('id_password', 'togglePassword', 'eyeIcon');
+</script>
+{% endblock %}

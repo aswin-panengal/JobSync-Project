@@ -1,0 +1,166 @@
+{% extends 'base.html' %}
+
+{% block title %}Upload Profile | JobSync{% endblock %}
+
+{% block content %}
+{# Include navbar INSIDE content block #}
+{% include '_navbar.html' %}
+<style>
+    /* You can keep page-specific styles here if needed */
+    body {
+        font-family: 'Inter', sans-serif;
+    }
+</style>
+
+<main class="flex items-center justify-center py-12 px-4">
+    <div class="w-full max-w-2xl mx-auto">
+
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div
+                class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-t-2xl p-6 text-center shadow-md">
+                <h1 class="text-3xl font-bold">JobSync</h1>
+                <p class="text-indigo-100 mt-1">Syncing Skills with Opportunities</p>
+            </div>
+
+            <div class="bg-white shadow-xl rounded-b-2xl p-8">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Your Profile & Preferences</h2>
+
+                {% if form.errors %}
+                <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6" role="alert">
+                    <p class="font-bold">Please correct the following errors:</p>
+                    <ul>
+                        {% for field, errors in form.errors.items %} {# field is the name string #}
+                        {% for error in errors %}
+                        {# Display the field name (title cased) and the error #}
+                        <li>{{ field|title }}: {{ error }}</li> {# <-- CORRECTED ERROR LINE #} {% endfor %} {% endfor %}
+                            {% for error in form.non_field_errors %} {# Handles errors not tied to a specific field #}
+                            <li>{{ error }}</li>
+                            {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+                <div id="uploadBox"
+                    class="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-xl p-6 hover:border-purple-500 transition cursor-pointer mb-8">
+
+                    {# The hidden file input rendered by Django #}
+                    {{ form.resume }}
+
+                    {# The clickable label that triggers the file input #}
+                    <label for="id_resume" class="flex flex-col items-center cursor-pointer">
+                        <svg id="uploadIcon" xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-gray-400 mb-3"
+                            fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M12 12v9" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 12l-4 4m4-4l4 4" />
+                        </svg>
+                        <span id="uploadText" class="text-gray-600 font-medium">Click to upload your Resume</span>
+                        <span class="text-xs text-gray-500 mt-1">PDF only, max 5MB</span>
+                    </label>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                    <div>
+                        <label for="{{ form.preferred_location.id_for_label }}"
+                            class="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                        {{ form.preferred_location }}
+                    </div>
+                    <div>
+                        <label for="{{ form.interested_domain.id_for_label }}"
+                            class="block text-sm font-medium text-gray-700 mb-1">Interested Domain</label>
+                        {{ form.interested_domain }}
+                    </div>
+                    <div>
+                        <label for="{{ form.experience_level_preference.id_for_label }}"
+                            class="block text-sm font-medium text-gray-700 mb-1">Experience Level</label>
+                        {{ form.experience_level_preference }}
+                    </div>
+                </div>
+                <div class="mb-8">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Employment Types</label>
+                    <div class="flex flex-wrap gap-x-4 gap-y-2 mt-1">
+                        {# Loop through the choices rendered by CheckboxSelectMultiple #}
+                        {% for choice in form.employment_types %}
+                        <label class="inline-flex items-center">
+                            {# Render the checkbox input tag manually with classes #}
+                            <input type="checkbox" name="{{ form.employment_types.html_name }}"
+                                value="{{ choice.data.value }}" {% if choice.data.selected %}checked{% endif %}
+                                id="{{ choice.data.attrs.id }}" {# Add ID for label linkage #}
+                                class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 h-4 w-4">
+                            {# Render the label for the choice #}
+                            <span class="ml-2 text-sm text-gray-700">{{ choice.choice_label }}</span>
+                        </label>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <button type="submit"
+                    class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-3 rounded-lg font-semibold hover:opacity-90 transition shadow-md">
+                    Search Jobs
+                </button>
+            </div>
+        </form>
+    </div>
+</main>
+
+{# Script to handle file input change appearance #}
+<script>
+    const resumeInput = document.getElementById('id_resume');
+    const uploadBox = document.getElementById('uploadBox');
+    const uploadText = document.getElementById('uploadText');
+    const uploadIcon = document.getElementById('uploadIcon');
+
+    if (resumeInput) {
+        // Input is hidden via widget attrs in forms.py
+
+        resumeInput.addEventListener('change', function () {
+            if (resumeInput.files.length > 0) {
+                const fileName = resumeInput.files[0].name;
+                if (uploadText && uploadBox && uploadIcon) { // Check elements exist
+                    uploadText.textContent = fileName;
+                    uploadText.classList.add('font-semibold', 'text-green-700');
+                    uploadBox.classList.remove('border-gray-300', 'hover:border-purple-500'); // Remove hover effect too
+                    uploadBox.classList.add('border-green-500');
+                    uploadIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />`; // Checkmark icon
+                    uploadIcon.classList.remove('text-gray-400');
+                    uploadIcon.classList.add('text-green-600');
+                }
+            }
+        });
+    } else {
+        console.warn("Resume input element 'id_resume' not found.");
+    }
+</script>
+
+{# Script to show existing filename on page load #}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Use the original filename passed from the view context
+        const originalFilename = "{{ original_filename }}";
+        // Check the actual saved file path (might have random chars)
+        const savedResumePath = "{{ form.instance.resume.name }}";
+
+        // Only update if a file is actually saved
+        if (savedResumePath) {
+            const uploadBox = document.getElementById('uploadBox');
+            const uploadText = document.getElementById('uploadText');
+            const uploadIcon = document.getElementById('uploadIcon');
+
+            // Show original name if available, else parse saved path
+            const fileNameToShow = originalFilename ? originalFilename : savedResumePath.split('/').pop();
+
+            if (uploadText && uploadBox && uploadIcon) {
+                uploadText.textContent = fileNameToShow;
+                uploadText.classList.add('font-semibold', 'text-green-700');
+                uploadBox.classList.remove('border-gray-300', 'hover:border-purple-500');
+                uploadBox.classList.add('border-green-500');
+                uploadIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />`;
+                uploadIcon.classList.remove('text-gray-400');
+                uploadIcon.classList.add('text-green-600');
+            }
+        }
+    });
+</script>
+
+{% endblock %}

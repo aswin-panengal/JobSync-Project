@@ -1,0 +1,251 @@
+{% extends 'base.html' %}
+
+{% block title %}Sign Up | JobSync{% endblock %}
+
+{% block content %}
+
+<style>
+    .validation-item.valid {
+        color: #10B981;
+        /* Green */
+    }
+
+    .validation-item.invalid {
+        color: #6B7280;
+        /* Gray */
+    }
+</style>
+
+<div class="flex items-center justify-center py-12">
+    <div class="w-full max-w-2xl mx-auto">
+        <div class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-t-2xl p-8 text-center shadow-lg">
+            <h1 class="text-3xl font-bold">JobSync</h1>
+            <p class="text-indigo-100 mt-1">Syncing Skills with Opportunities</p>
+        </div>
+
+        <div class="bg-white shadow-xl rounded-b-2xl p-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Create Your Professional Profile</h2>
+
+            {% if user_form.errors or profile_form.errors %}
+            <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6" role="alert">
+                <p class="font-bold">Please correct the following errors:</p>
+                <ul>
+                    {% for field, errors in user_form.errors.items %}
+                    {% for error in errors %}<li>{{ field|title }}: {{ error }}</li>{% endfor %}
+                    {% endfor %}
+                    {% for field, errors in profile_form.errors.items %}
+                    {% for error in errors %}<li>{{ field|title }}: {{ error }}</li>{% endfor %} {# Use field name if
+                    label access is tricky #}
+                    {% endfor %}
+                    {% for error in form.non_field_errors %} {# Display non-field errors if any #}
+                    <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            <form method="POST" class="space-y-6">
+                {% csrf_token %}
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="{{ profile_form.first_name.id_for_label }}"
+                            class="block text-sm font-medium text-gray-700">First Name</label>
+                        {{ profile_form.first_name }}
+                    </div>
+                    <div>
+                        <label for="{{ profile_form.last_name.id_for_label }}"
+                            class="block text-sm font-medium text-gray-700">Last Name</label>
+                        {{ profile_form.last_name }}
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="{{ user_form.email.id_for_label }}"
+                            class="block text-sm font-medium text-gray-700">Email Address</label>
+                        {{ user_form.email }}
+                    </div>
+                    <div>
+                        <label for="{{ profile_form.phone_number.id_for_label }}"
+                            class="block text-sm font-medium text-gray-700">Phone Number</label>
+                        {{ profile_form.phone_number }}
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="{{ profile_form.age.id_for_label }}"
+                            class="block text-sm font-medium text-gray-700">Age</label>
+                        {{ profile_form.age }}
+                    </div>
+                    <div>
+                        <label for="{{ profile_form.highest_qualification.id_for_label }}"
+                            class="block text-sm font-medium text-gray-700">Highest Qualification</label>
+                        {{ profile_form.highest_qualification }}
+                    </div>
+                </div>
+
+                <div>
+                    <label for="{{ profile_form.interested_domain.id_for_label }}"
+                        class="block text-sm font-medium text-gray-700">Interested Domain</label>
+                    {{ profile_form.interested_domain }} {# Renders the dropdown #}
+                </div>
+
+                <div id="other_domain_wrapper_signup" style="display: none;">
+                    <label for="{{ profile_form.interested_domain_other.id_for_label }}"
+                        class="block text-sm font-medium text-gray-700">If 'Other', please specify domain</label>
+                    {{ profile_form.interested_domain_other }}
+                </div>
+
+                <div>
+                    <label for="{{ profile_form.experience_level_preference.id_for_label }}"
+                        class="block text-sm font-medium text-gray-700">Experience Level</label>
+                    {{ profile_form.experience_level_preference }}
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="{{ user_form.password.id_for_label }}"
+                            class="block text-sm font-medium text-gray-700">Password</label>
+                        <div class="relative">
+                            {{ user_form.password }}
+                            <button type="button" id="togglePassword"
+                                class="absolute inset-y-0 right-0 px-3 flex items-center text-gray-500">
+                                <svg id="eyeIcon" class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                    viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                            </button>
+                        </div>
+                        <div id="password-validation" class="mt-2 text-sm space-y-1">
+                            <p id="length-check" class="validation-item invalid"><span class="indicator">❌</span> At
+                                least 8 characters</p>
+                            <p id="upper-check" class="validation-item invalid"><span class="indicator">❌</span> At
+                                least one uppercase letter (A-Z)</p>
+                            <p id="number-check" class="validation-item invalid"><span class="indicator">❌</span> At
+                                least one number (0-9)</p>
+                            <p id="symbol-check" class="validation-item invalid"><span class="indicator">❌</span> At
+                                least one symbol (!, @, #)</p>
+                        </div>
+                    </div>
+                    <div>
+                        <label for="{{ user_form.confirm_password.id_for_label }}"
+                            class="block text-sm font-medium text-gray-700">Confirm Password</label>
+                        <div class="relative">
+                            {{ user_form.confirm_password }}
+                            <button type="button" id="toggleConfirmPassword"
+                                class="absolute inset-y-0 right-0 px-3 flex items-center text-gray-500">
+                                <svg id="eyeIconConfirm" class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                    viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <button type="submit"
+                        class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-3 px-4 rounded-lg font-semibold hover:opacity-90 transition shadow-md">
+                        Create Account
+                    </button>
+                </div>
+            </form> {# End of form #}
+
+            <p class="mt-8 text-center text-sm text-gray-700">
+                Already have an account?
+                <a href="{% url 'signin' %}" class="font-medium text-indigo-600 hover:text-indigo-500">
+                    Login
+                </a>
+            </p>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- Password Validation Script ---
+    const passwordInput = document.getElementById('password'); // Use Django's generated ID
+    const lengthCheck = document.getElementById('length-check');
+    const numberCheck = document.getElementById('number-check');
+    const symbolCheck = document.getElementById('symbol-check');
+    const upperCheck = document.getElementById('upper-check');
+
+    if (passwordInput && lengthCheck && numberCheck && symbolCheck && upperCheck) {
+        const validatePassword = () => {
+            const password = passwordInput.value;
+            const updateCheck = (element, isValid) => {
+                const indicator = element.querySelector('.indicator');
+                if (!element || !indicator) return;
+                element.classList.toggle('valid', isValid);
+                element.classList.toggle('invalid', !isValid);
+                indicator.textContent = isValid ? '✓' : '❌';
+            };
+            updateCheck(lengthCheck, password.length >= 8);
+            updateCheck(numberCheck, /\d/.test(password));
+            updateCheck(symbolCheck, /[\W_]/.test(password));
+            updateCheck(upperCheck, /[A-Z]/.test(password));
+        };
+        passwordInput.addEventListener('input', validatePassword);
+        validatePassword(); // Initial check
+    } else {
+        console.warn("Password validation elements not found.");
+    }
+
+    // --- Password Visibility Toggle Script ---
+    const eyeIconSvg = `<path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />`;
+    const eyeSlashIconSvg = `<path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.572M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M1.5 1.5l21 21" />`;
+
+    function setupPasswordToggle(inputId, buttonId, svgId) {
+        const passwordInputElem = document.getElementById(inputId);
+        const toggleButton = document.getElementById(buttonId);
+        const eyeIcon = document.getElementById(svgId);
+
+        if (passwordInputElem && toggleButton && eyeIcon) {
+            toggleButton.addEventListener('click', () => {
+                const isPassword = passwordInputElem.type === 'password';
+                passwordInputElem.type = isPassword ? 'text' : 'password';
+                eyeIcon.innerHTML = isPassword ? eyeSlashIconSvg : eyeIconSvg;
+            });
+        } else {
+            console.warn(`Password toggle elements not found for inputId: ${inputId}`);
+        }
+    }
+
+    setupPasswordToggle('password', 'togglePassword', 'eyeIcon');
+    setupPasswordToggle('id_confirm_password', 'toggleConfirmPassword', 'eyeIconConfirm');
+
+    // --- Interested Domain 'Other' Field Toggle Script ---
+    const domainSelectSignup = document.getElementById('id_interested_domain'); // Use the ID added in forms.py
+    const otherWrapperSignup = document.getElementById('other_domain_wrapper_signup');
+    const otherInputSignup = document.getElementById('id_interested_domain_other'); // Use the ID added in forms.py
+
+    function toggleOtherDomainSignup() {
+        if (!domainSelectSignup || !otherWrapperSignup) return; // Exit if elements not found
+        if (domainSelectSignup.value === 'Other') {
+            otherWrapperSignup.style.display = 'block';
+        } else {
+            otherWrapperSignup.style.display = 'none';
+            // Optionally clear the 'Other' input when hidden
+            // if (otherInputSignup) otherInputSignup.value = '';
+        }
+    }
+
+    if (domainSelectSignup && otherWrapperSignup) {
+        // Run on initial load in case 'Other' is pre-selected (e.g., form redisplay with errors)
+        toggleOtherDomainSignup();
+        // Add event listener for changes
+        domainSelectSignup.addEventListener('change', toggleOtherDomainSignup);
+    } else {
+        console.warn("Domain toggle elements not found.");
+    }
+
+</script>
+
+{% endblock %} {# End of content block #}
