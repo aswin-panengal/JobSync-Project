@@ -41,8 +41,15 @@ def resume_upload_view(request):
             # Explicitly set preferences from cleaned data before main save
             saved_profile.experience_level_preference = form.cleaned_data.get('experience_level_preference', 'Any')
             saved_profile.employment_type_preference = ",".join(form.cleaned_data.get('employment_types', [])) or '' # Save joined list or empty string
-            saved_profile.interested_domain = form.cleaned_data.get('interested_domain', '')
-
+            #saved_profile.interested_domain = form.cleaned_data.get('interested_domain', '')
+            domain = form.cleaned_data.get('interested_domain')
+            if domain == 'Other':
+                # Get text from the 'other' field
+                saved_profile.interested_domain = form.cleaned_data.get('interested_domain_other', '')
+            else:
+                # Get text from the dropdown
+                saved_profile.interested_domain = domain
+            
             # Save profile instance with new resume file association and all preferences
             saved_profile.save()
 

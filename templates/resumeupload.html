@@ -6,7 +6,6 @@
 {# Include navbar INSIDE content block #}
 {% include '_navbar.html' %}
 <style>
-    /* You can keep page-specific styles here if needed */
     body {
         font-family: 'Inter', sans-serif;
     }
@@ -68,8 +67,16 @@
                     </div>
                     <div>
                         <label for="{{ form.interested_domain.id_for_label }}"
-                            class="block text-sm font-medium text-gray-700 mb-1">Interested Domain</label>
+                            class="block text-sm font-medium text-gray-700">Interested Domain</label>
                         {{ form.interested_domain }}
+                        {{ form.interested_domain.errors }}
+                    </div>
+
+                    <div id="other_domain_container_div" style="display: none;"> <label
+                            for="{{ form.interested_domain_other.id_for_label }}"
+                            class="block text-sm font-medium text-gray-700">If 'Other', please specify</label>
+                        {{ form.interested_domain_other }}
+                        {{ form.interested_domain_other.errors }}
                     </div>
                     <div>
                         <label for="{{ form.experience_level_preference.id_for_label }}"
@@ -162,5 +169,37 @@
         }
     });
 </script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Get the elements
+        const domainSelect = document.getElementById('id_interested_domain');
+        const otherDomainField = document.getElementById('id_interested_domain_other');
 
+        // Find the form group/div that contains the 'other' field.
+        // Django forms often wrap fields in a <div> or <p>. We need to hide the whole group.
+        // Let's assume the label and input are inside a parent div we can target.
+        // A simple way is to find the input, then get its parent (or parent's parent).
+        // For simplicity, let's assume the input's direct parent is what we want to hide.
+        // **If this doesn't work, we may need to adjust the selector**
+        const otherDomainContainer = otherDomainField ? otherDomainField.closest('div') : null; // Adjust 'div' if needed
+
+        function toggleOtherField() {
+            if (domainSelect && otherDomainContainer) {
+                if (domainSelect.value === 'Other') {
+                    otherDomainContainer.style.display = 'block'; // Show it
+                } else {
+                    otherDomainContainer.style.display = 'none'; // Hide it
+                }
+            }
+        }
+
+        // Run on page load to set the initial state
+        toggleOtherField();
+
+        // Add event listener to the dropdown
+        if (domainSelect) {
+            domainSelect.addEventListener('change', toggleOtherField);
+        }
+    });
+</script>
 {% endblock %}

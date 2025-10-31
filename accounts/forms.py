@@ -162,7 +162,7 @@ class ResumeUploadForm(forms.ModelForm):
         choices=EXPERIENCE_CHOICES,
         required=False, # Preference is optional
         label="Experience Level",
-        widget=forms.Select(attrs={'class': tailwind_classes})
+        widget=forms.Select(attrs={'class': tailwind_classes,'id': 'id_interested_domain'})
     )
     employment_types = forms.MultipleChoiceField(
         choices=EMPLOYMENT_CHOICES,
@@ -175,11 +175,18 @@ class ResumeUploadForm(forms.ModelForm):
         required=True, # Domain required for searching jobs
         widget=forms.Select(attrs={'class': tailwind_classes})
     )
-
+    
+    interested_domain_other = forms.CharField(
+        required=False, 
+        max_length=100,
+        label="If 'Other', please specify domain",
+        widget=forms.TextInput(attrs={'class': tailwind_classes + ' mt-2', 'id': 'id_interested_domain_other'})
+    )
     class Meta:
         model = Profile
         # Fields shown on the resume upload/preference page
         fields = ['preferred_location', 'interested_domain',
+                  'interested_domain_other',
                   'experience_level_preference', 'employment_types',
                   'resume'] # Resume field comes from Profile model
         widgets = {
