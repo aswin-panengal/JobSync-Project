@@ -135,4 +135,5 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 #API keys
 
-RAPIDAPI_KEY = 'ab310ae1c7mshefe9fc5bb4d43f9p19b8dejsn99d0f547b43e'
+# OLD ONE RAPIDAPI_KEY = 'ab310ae1c7mshefe9fc5bb4d43f9p19b8dejsn99d0f547b43e'
+RAPIDAPI_KEY = '33aab0abbdmshbd1ee0688ac6bbcp1b3b3fjsn4854b771ccb7'

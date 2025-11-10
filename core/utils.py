@@ -89,7 +89,7 @@ def extract_skills(text):
                  skill_id_str = NLP.vocab.strings[skill_id_hash]
                  if skill_id_str in skill_lookup:
                       found_skills.add(skill_lookup[skill_id_str])
-        return sorted([skill.title() for skill in found_skills]) # Return Title Case
+        return [skill.title() for skill in found_skills] # Return Title Case
     except Exception as e:
          print(f"ERROR during spaCy skill matching: {e}")
          return []

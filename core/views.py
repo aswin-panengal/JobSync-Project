@@ -2,10 +2,14 @@
 
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
-from accounts.forms import ResumeUploadForm # Import the form from the accounts app
+from accounts.forms import ResumeUploadForm # Import the form
 from django.contrib import messages
-from . import utils # Your custom logic functions (parsing, API calls)
+from . import utils # Your custom logic functions
 from django.core.files.storage import default_storage # For handling file paths
+import json
+import os
+from django.conf import settings
+
 
 def index_view(request):
     """Renders the homepage."""
@@ -41,11 +45,13 @@ def resume_upload_view(request):
             # Explicitly set preferences from cleaned data before main save
             saved_profile.experience_level_preference = form.cleaned_data.get('experience_level_preference', 'Any')
             saved_profile.employment_type_preference = ",".join(form.cleaned_data.get('employment_types', [])) or '' # Save joined list or empty string
-            #saved_profile.interested_domain = form.cleaned_data.get('interested_domain', '')
+            
+            # This is your "Other" domain logic. It's correct.
             domain = form.cleaned_data.get('interested_domain')
             if domain == 'Other':
                 # Get text from the 'other' field
-                saved_profile.interested_domain = form.cleaned_data.get('interested_domain_other', '')
+                # FIX 1: Add .strip() to clean any whitespace
+                saved_profile.interested_domain = form.cleaned_data.get('interested_domain_other', '').strip()
             else:
                 # Get text from the dropdown
                 saved_profile.interested_domain = domain
@@ -53,26 +59,116 @@ def resume_upload_view(request):
             # Save profile instance with new resume file association and all preferences
             saved_profile.save()
 
-            # Process the uploaded resume file if it exists
+            # --- START OF "HYBRID LOGIC" BLOCK ---
             if saved_profile.resume:
                 resume_path = default_storage.path(saved_profile.resume.name)
                 try:
-                    # Call utility functions to parse PDF and extract skills
+                    # 1. Get the domain the user just selected (e.g., "Data Science" or "C++")
+                    # FIX 2: Add .strip() to ensure a clean key for the dictionary
+                    domain = saved_profile.interested_domain.strip()
+
+                    # 2. Define the "key" skills for each PREDEFINED domain
+                    # --- FIX 3: This map is NOW CORRECT and matches your form values ---
+                    domain_skills_map = {
+                        'Web Development': [
+                            'python', 'django', 'flask', 'fastapi', 'java', 'c#', '.net', 'spring', 'springboot', 
+                            'javascript', 'typescript', 'react', 'react.js', 'angular', 'angular.js', 'vue', 'vue.js', 
+                            'nodejs', 'node.js', 'express', 'express.js', 'next.js', 'nestjs', 
+                            'html', 'html5', 'css', 'css3', 'sass', 'scss', 'tailwind', 'tailwindcss', 'bootstrap',
+                            'php', 'laravel', 'ruby', 'ruby on rails'
+                        ],
+                        'Data Science': [
+                            'data analysis', 'data science', 'python', 'pandas', 'numpy', 'scipy', 'matplotlib', 
+                            'seaborn', 'plotly', 'jupyter', 'r', 'sql'
+                        ],
+                        'Machine Learning': [
+                            'machine learning', 'ml', 'deep learning', 'dl', 'python', 'scikit-learn', 'sklearn', 
+                            'tensorflow', 'keras', 'pytorch', 'opencv', 'computer vision', 
+                            'natural language processing', 'nlp', 'spacy', 'nltk', 'transformers', 'hugging face', 
+                            'bert', 'gpt'
+                        ],
+                        'Cloud Computing': [
+                            'aws', 'amazon web services', 'azure', 'microsoft azure', 'gcp', 'google cloud platform', 
+                            'heroku', 'digitalocean', 'docker', 'kubernetes', 'k8s'
+                        ],
+                        'DevOps': [
+                            'docker', 'kubernetes', 'k8s', 'openshift', 'terraform', 'ansible', 'puppet', 'chef', 
+                            'ci/cd', 'continuous integration', 'continuous delivery', 'jenkins', 'gitlab ci', 
+                            'github actions', 'travis ci', 'circleci', 'linux', 'bash'
+                        ],
+                        'Mobile Development': [
+                            'java', 'kotlin', 'swift', 'objective-c', 'dart', 'flutter', 'react native'
+                        ],
+                        'Cybersecurity': [
+                            'cybersecurity', 'information security', 'network security', 'penetration testing', 'owasp'
+                        ],
+                        'Database Administration': [
+                            'sql', 'mysql', 'postgresql', 'postgres', 'sqlite', 'microsoft sql server', 'oracle', 
+                            'mongodb', 'redis', 'elasticsearch', 'cassandra', 'mariadb'
+                        ],
+                        'Networking': [
+                            'network security', 'linux', 'unix', 'windows server', 'bash', 'shell scripting'
+                        ],
+                        'UI/UX Design': [
+                            'ui', 'user interface', 'ux', 'user experience', 'figma', 'sketch', 'adobe xd', 'design systems'
+                        ],
+                        'Project Management': [
+                            'agile', 'scrum', 'kanban', 'jira', 'confluence', 'project management', 'product management'
+                        ]
+                    }
+                    
+                    # 3. Get the *unsorted* list of all skills from the PDF
                     text = utils.extract_text_from_pdf(resume_path)
-                    skills_list = utils.extract_skills(text)
-                    saved_profile.skills = ", ".join(skills_list)
-                    # Save only the updated skills field
+                    all_extracted_skills = utils.extract_skills(text) # e.g., ['C++', 'Python', 'HTML', 'Pandas']
+
+                    
+                    # 4. --- HYBRID LOGIC ---
+                    final_sorted_skills = []
+                    
+                    # Check if the domain is one of our predefined ones
+                    if domain in domain_skills_map:
+                        # --- "SMART" SORTING ---
+                        # This is a predefined domain, so we sort it
+                        relevant_skills = []
+                        other_skills = []
+                        key_skills_for_domain = domain_skills_map.get(domain, [])
+                        
+                        for skill in all_extracted_skills:
+                            if skill.lower() in key_skills_for_domain:
+                                relevant_skills.append(skill)
+                            else:
+                                other_skills.append(skill)
+                        
+                        # Combine the lists, with relevant skills first
+                        final_sorted_skills = relevant_skills + other_skills
+                    
+                    else:
+                        # --- "AS-IS" (DUMB) SORTING ---
+                        # This is an "Other" domain (like "C++").
+                        # We just use the list as-is.
+                        final_sorted_skills = all_extracted_skills
+                    
+                    # 5. --- SLICE TO GET TOP 5 ---
+                    # This applies the Top 5 rule to *both* cases
+                    top_5_skills = final_sorted_skills[:5]
+
+                    # 6. Save the final, top 5 list to the profile
+                    saved_profile.skills = ", ".join(top_5_skills)
                     saved_profile.save(update_fields=['skills'])
-                    print(f"--- Skills extracted for {profile.user.username}: {len(skills_list)} found ---") # Log essential info
+                    
+                    print(f"--- Skills saved for domain '{domain}'. Final list: {top_5_skills} ---")
+                
                 except Exception as e:
-                    print(f"ERROR during PDF processing/skill extraction for {profile.user.username}: {e}")
+                    print(f"ERROR during PDF processing/skill sorting for {profile.user.username}: {e}")
                     messages.error(request, "Could not process the uploaded resume.")
+            
             else:
                  # Inform user if only preferences were updated (no new resume file)
                  if form.has_changed():
-                     messages.success(request, "Preferences updated successfully.")
+                       messages.success(request, "Preferences updated successfully.")
                  else:
-                     messages.info(request, "No changes detected.") # Or "No new resume uploaded."
+                       messages.info(request, "No changes detected.") # Or "No new resume uploaded."
+            # --- END OF NEW BLOCK ---
 
             # Redirect to results page after saving preferences and attempting parsing
             return redirect('results_page')
@@ -89,7 +185,6 @@ def resume_upload_view(request):
 
     # Render the template for GET or invalid POST
     return render(request, 'resumeupload.html', context)
-
 
 @login_required
 def results_view(request):
